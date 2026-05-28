@@ -1,0 +1,50 @@
+implement MkMailIcon;
+
+include "sys.m";
+	sys: Sys;
+include "draw.m";
+	draw: Draw;
+	Display, Image, Rect, Point: import draw;
+
+MkMailIcon: module
+{
+	init:	fn(ctxt: ref Draw->Context, argv: list of string);
+};
+
+display: ref Display;
+
+init(nil: ref Draw->Context, nil: list of string)
+{
+	sys = load Sys Sys->PATH;
+	draw = load Draw Draw->PATH;
+	display = Display.allocate(nil);
+	if(display == nil) { sys->fprint(sys->fildes(2), "no display: %r\n"); return; }
+
+	all := Rect(Point(0,0), Point(28,28));
+	icon := display.newimage(all, draw->CMAP8, 0, draw->White);
+	bg := display.rgb(214, 218, 226);
+	icon.draw(all, bg, nil, Point(0,0));
+
+	edge := display.rgb(70, 70, 78);
+	body := display.white;
+
+	# Envelope body.
+	icon.draw(Rect(Point(3,6),  Point(25,22)), edge, nil, Point(0,0));
+	icon.draw(Rect(Point(4,7),  Point(24,21)), body, nil, Point(0,0));
+
+	# Flap: two diagonals from the top corners meeting at the centre.
+	icon.line(Point(4,7),  Point(14,16), Draw->Endsquare, Draw->Endsquare, 1, edge, Point(0,0));
+	icon.line(Point(24,7), Point(14,16), Draw->Endsquare, Draw->Endsquare, 1, edge, Point(0,0));
+
+	mask := display.newimage(all, draw->GREY1, 0, draw->White);
+	writeimg("/usr/inferno/!Mail/icons/!Mail.bit",  icon);
+	writeimg("/usr/inferno/!Mail/icons/!Mail.mask", mask);
+	sys->print("wrote !Mail\n");
+}
+
+writeimg(path: string, img: ref Image)
+{
+	fd := sys->create(path, Sys->OWRITE, 8r644);
+	if(fd == nil) { sys->fprint(sys->fildes(2), "create %s: %r\n", path); return; }
+	display.writeimage(fd, img);
+}

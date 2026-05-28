@@ -57,27 +57,26 @@ card(img: ref Image, r: Rect, border, face: ref Image)
 	img.draw(inner, face, nil, Point(0,0));
 }
 
-# Heart centred at c.
+# Heart centred at c: two lobes plus a downward point (stacked rows).
 heart(img: ref Image, c: Point, src: ref Image)
 {
 	img.fillellipse(Point(c.x-2, c.y-1), 2, 2, src, Point(0,0));
 	img.fillellipse(Point(c.x+2, c.y-1), 2, 2, src, Point(0,0));
-	pts := array[] of {
-		Point(c.x-4, c.y), Point(c.x+4, c.y), Point(c.x, c.y+5),
-	};
-	img.fillpoly(pts, 1, src, Point(0,0));
+	for(i := 0; i <= 5; i++) {
+		hw := 4 - (i*4)/5;
+		img.draw(Rect(Point(c.x-hw, c.y+i), Point(c.x+hw+1, c.y+i+1)), src, nil, Point(0,0));
+	}
 }
 
-# Spade centred at c.
+# Spade centred at c: upward point, two lobes, and a stem (stacked rows).
 spade(img: ref Image, c: Point, src: ref Image)
 {
+	for(i := 0; i <= 5; i++) {
+		hw := (i*4)/5;
+		img.draw(Rect(Point(c.x-hw, c.y-5+i), Point(c.x+hw+1, c.y-4+i)), src, nil, Point(0,0));
+	}
 	img.fillellipse(Point(c.x-2, c.y), 2, 2, src, Point(0,0));
 	img.fillellipse(Point(c.x+2, c.y), 2, 2, src, Point(0,0));
-	pts := array[] of {
-		Point(c.x, c.y-5), Point(c.x-4, c.y+1), Point(c.x+4, c.y+1),
-	};
-	img.fillpoly(pts, 1, src, Point(0,0));
-	# stem
 	img.draw(Rect(Point(c.x-1, c.y), Point(c.x+1, c.y+5)), src, nil, Point(0,0));
 }
 
